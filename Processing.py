@@ -6,11 +6,10 @@ class Processing:
         sampleRate = sampleF
         nyq_rate = sampleRate/2.0
         width = (fc*2)/nyq_rate
-        rst  = 60.0
-        N, beta = sp.kaiserord(rst, width)
-        cutoff_hz = fc
-        taps  = sp.firwin(N, cutoff_hz/nyq_rate,width, window = 'kaiser')
-        filtered = sp.lfilter(taps,1.0,signal)
+        Wn = fc/nyq_rate
+        order = 20
+        a = sp.firwin(order, Wn)
+        filtered = sp.lfilter(a,1.0,signal)
         return filtered
     
     def NotchFilter(self, signal, fc, sampleF):

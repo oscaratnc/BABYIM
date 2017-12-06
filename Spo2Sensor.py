@@ -176,6 +176,7 @@ class Spo2Sensor (object):
    
     
     def __init__(self, mode = 'SPO2', ledCurrent = 6.4, sampleAvg = 1, sampleRate = 100, pulseWidth = 411, ADCrange = 16384):
+        print "begin Spo2 config"
         self.setLEDMode(mode)
         self.setFIFOAverage(sampleAvg)
         self.setLEDCurrent(ledCurrent)

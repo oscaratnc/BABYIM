@@ -5,7 +5,7 @@ class Processing:
     def lowPasFIRFilter(self,signal,fc,sampleF):
         sampleRate = sampleF
         nyq_rate = sampleRate/2.0
-        width = (f2*2)/nyq_rate
+        width = (fc*2)/nyq_rate
         rst  = 60.0
         N, beta = sp.kaiserord(rst, width)
         cutoff_hz = fc

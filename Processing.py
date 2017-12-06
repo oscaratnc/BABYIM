@@ -7,7 +7,7 @@ class Processing:
         nyq_rate = sampleRate/2.0
         width = (fc*2)/nyq_rate
         Wn = fc/nyq_rate
-        order = 5
+        order = 20
         a = sp.firwin(order, Wn)
         filtered = sp.lfilter(a,1.0,signal)
         return filtered
@@ -16,7 +16,7 @@ class Processing:
         nyqRate = sampleF/2.0
         f1 = (fc-20)/nyqRate
         f2 = (fc+20)/nyqRate
-        order = 5
+        order = 25
         a = sp.firwin(order, [f1,f2])
         Filtered = sp.lfilter(a,1.0,signal)
         return Filtered

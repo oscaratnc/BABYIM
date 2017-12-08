@@ -13,6 +13,7 @@ GPIO.setmode(GPIO.BCM)
 class Sensor:
     
     def __init__(self,samplerateSpo2):
+
         #Definitions for ECG acquisition
         print "begin ECG config"
         CLK  = 11
@@ -34,6 +35,7 @@ class Sensor:
         self.IR = np.array([])
         self.Spo2Value = 0
         print "config done"
+        
 
 
     def getECG(self, numSeconds):
@@ -53,7 +55,7 @@ class Sensor:
         print "begin SPO2 measure"
         startTime = wiringpi.millis()
         newSample = False
-        AFthreshold= 17
+        AFthreshold= 20
         self.Spo2.enableAfull()
         self.Spo2.setFIFOAF(AFthreshold)
         interrupt  = Button(7)
@@ -81,26 +83,44 @@ class Sensor:
         #self.IR = pro.delaySignal(self. IR)
 
         #Median filter to the signals
-        self.IR = sp.medfilt(self.IR)
-        self.Red = sp.medfilt(self.Red)
+        #self.IR = sp.medfilt(self.IR)
+        #self.Red = sp.medfilt(self.Red)
 
         #low pass filter at 60hz
         #self.IR = pro.NotchFilter(self.IR, 60,self.samplerate)
         #self.Red = pro.NotchFilter(self.Red, 60,self.samplerate)
 
         #lowpass filter at 6Hz:
-        self.IR = pro.lowPasFIRFilter(self.IR, 6,self.samplerate)
-        self.Red = pro.lowPasFIRFilter(self.Red, 6,self.samplerate)
+        #self.IR = pro.lowPasFIRFilter(self.IR, 6,self.samplerate)
+        #self.Red = pro.lowPasFIRFilter(self.Red, 6,self.samplerate)
         
         #Compute Spo2Value:
         self.Spo2Value = pro.calcSpO2(self.Red,self.IR)
         print "Spo2: ", self.Spo2Value, "%"
 
+        self.generateDataFile()
+        
         #get AC componente to plot the signal:
         self.Red = pro.getACcomponent(self.Red)
         self.IR = pro.getACcomponent(self.IR)
         #self.IR = pro.Normalize(self.IR)
+    
+    def generateDataFile(self):
+        
+        file = open("DataFile_Read.csv", "w")
+        
+        file.write(str(self.Red.tolist()))
+        file.write("\n")
+        file.write(str(self.IR.tolist()))
+        file.write("\n")
+        file.write(str(self.ecgValues.tolist()))
+        file.close()
 
+        print "File Created"
+        return True
+
+
+        
 
         
         

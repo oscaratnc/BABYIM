@@ -9,7 +9,7 @@ class Processing:
         Wn = fc/nyq_rate
         order = 20
         a = sp.firwin(order, Wn)
-        filtered = sp.lfilter(a,1.0,signal)
+        filtered = sp.filtfilt(a,1.0,signal)
         return filtered
     
     def NotchFilter(self, signal, fc, sampleF):

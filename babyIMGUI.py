@@ -3,9 +3,10 @@ from pyqtgraph.Qt import QtGui, QtCore
 import numpy as np
 import pyqtgraph as pg
 
-numSecondsECG=2
-numSecondsSpO2=4
+numSecondsECG=1
+numSecondsSpO2=7
 sampleRateSpo2 = 200
+
 
 Sensors = Sensor(sampleRateSpo2)
 print "ECG reading"
@@ -13,6 +14,10 @@ Sensors.getECG(numSecondsECG)
 print "ECG done"
 Sensors.getSpo2(numSecondsSpO2)
 print "SPO2 done"
+
+#Sensors.generateDataFile()
+
+
 ECG = Sensors.ecgValues
 RED  = Sensors.Red
 IR = Sensors.IR
@@ -24,7 +29,7 @@ IR = Sensors.IR
 app = QtGui.QApplication([])
 
 win = pg.GraphicsWindow()
-win.resize(800,800)
+win.resize(800,600)
 win.setWindowTitle("Signals Ploting")
 
 pg.setConfigOptions(antialias= True)

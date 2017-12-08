@@ -10,6 +10,7 @@
     "passive": false,
     "debug": false,
     "privateKeyPath": null,
+    
     "passphrase": null,
     "ignore": [
         "\\.vscode",

@@ -3,8 +3,8 @@ from pyqtgraph.Qt import QtGui, QtCore
 import numpy as np
 import pyqtgraph as pg
 
-numSecondsECG=1
-numSecondsSpO2=7
+numSecondsECG=2
+numSecondsSpO2=8
 sampleRateSpo2 = 200
 
 

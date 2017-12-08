@@ -25,8 +25,8 @@ class Sensor:
        
 
         #Definitions fot Spo2 acquisition
-        self.samplerate = samplerateSpo2
-        self.Spo2 = Sp2.Spo2Sensor(sampleAvg= 4,sampleRate=self.samplerate)
+        self.samplerateSpo2 = samplerateSpo2
+        self.Spo2 = Sp2.Spo2Sensor(sampleAvg= 4,sampleRate=self.samplerateSpo2)
         print "SpO2 config ready"
 
         #Array variables to store samples
@@ -65,35 +65,44 @@ class Sensor:
             if self.Spo2.newSample == True:
                 self.Spo2.readSample()
                 self.Spo2.newSample = False
+            print (wiringpi.millis()-startTime)/1000
+        print "Spo2 measure ready"
                 
-        
+        print "processing signal...."
         print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 
-        print "Buffer IR: ", len(self.Spo2.buffer_ir)
-        print "Buffer Red: ", len(self.Spo2.buffer_red)
-
+        print "SF Reading IR: ", len(self.Spo2.buffer_ir)/numSeconds
+        print "SF Reading Red: ", len(self.Spo2.buffer_red)/numSeconds
+        
+        SampleFReading =  len(self.Spo2.buffer_ir)/numSeconds
         pro = pr.Processing()
 
         #get Red and Ir buffers
         self.IR = self.Spo2.buffer_ir
         self.Red = self.Spo2.buffer_red
 
-        #Delay Signal to avoid start overshoot
-        #self.Red = pro.delaySignal(self.Red)
-        #self.IR = pro.delaySignal(self. IR)
-
+        #Normalize Red and IR signals}
+        self.Red = pro.Normalize(self.Red)
+        self.IR = pro.Normalize(self.IR)
+       
         #Median filter to the signals
-        #self.IR = sp.medfilt(self.IR)
-        #self.Red = sp.medfilt(self.Red)
+        self.IR = sp.medfilt(self.IR,5)
+        self.Red = sp.medfilt(self.Red,5)
 
         #low pass filter at 60hz
-        #self.IR = pro.NotchFilter(self.IR, 60,self.samplerate)
-        #self.Red = pro.NotchFilter(self.Red, 60,self.samplerate)
+        self.IR = pro.NotchFilter(self.IR, 60,SampleFReading)
+        self.Red = pro.NotchFilter(self.Red, 60,SampleFReading)
+
 
         #lowpass filter at 6Hz:
-        #self.IR = pro.lowPasFIRFilter(self.IR, 6,self.samplerate)
-        #self.Red = pro.lowPasFIRFilter(self.Red, 6,self.samplerate)
-        
+        self.IR = pro.lowPasFIRFilter(self.IR, 6,SampleFReading)
+        self.Red = pro.lowPasFIRFilter(self.Red, 6
+        ,SampleFReading)
+    
+        #highpass filter at .5Hz:
+        self.IR = pro.highPassFIRFilter(self.IR,.5,SampleFReading)
+        self.Red = pro.highPassFIRFilter(self.Red,.5,SampleFReading)
+
         #Compute Spo2Value:
         self.Spo2Value = pro.calcSpO2(self.Red,self.IR)
         print "Spo2: ", self.Spo2Value, "%"
@@ -103,7 +112,7 @@ class Sensor:
         #get AC componente to plot the signal:
         self.Red = pro.getACcomponent(self.Red)
         self.IR = pro.getACcomponent(self.IR)
-        #self.IR = pro.Normalize(self.IR)
+       
     
     def generateDataFile(self):
         

@@ -5,27 +5,32 @@ class Processing:
     def lowPasFIRFilter(self,signal,fc,sampleF):
         sampleRate = sampleF
         nyq_rate = sampleRate/2.0
-        width = (fc*2)/nyq_rate
-        Wn = fc/nyq_rate
-        order = 20
+        Wn = fc/nyq_rate 
+        order = 100
         a = sp.firwin(order, Wn)
+        filtered = sp.filtfilt(a,1.0,signal)
+        return filtered
+
+    def highPassFIRFilter(self, signal,fc,sampleF):
+        sampleRate = sampleF
+        nyq_rate = sampleRate/2.0
+        Wn = fc/nyq_rate 
+        order = 99
+        a = sp.firwin(order, Wn, pass_zero=False)
         filtered = sp.filtfilt(a,1.0,signal)
         return filtered
     
     def NotchFilter(self, signal, fc, sampleF):
         nyqRate = sampleF/2.0
-        f1 = (fc-20)/nyqRate
-        f2 = (fc+20)/nyqRate
-        order = 25
-        a = sp.firwin(order, [f1,f2])
-        Filtered = sp.lfilter(a,1.0,signal)
+        f1 = (fc-.5)/nyqRate
+        f2 = (fc+.5)/nyqRate
+        bandwidth = [f1,f2]
+        order = 49
+        a = sp.firwin(order, bandwidth)
+        Filtered = sp.filtfilt(a,1,signal)
         return Filtered
 
-    def delaySignal(self, measure):
-        size = np.alen(measure)
-        measure = measure[int(size*.3): size]
-        return measure
-    
+  
     def getACcomponent(self, measure):
         mean = np.mean(measure)
         measure = measure-mean
@@ -47,7 +52,6 @@ class Processing:
     def calcSpO2(self, measureRed, measureIR):
         RR = self.ratioOfRatios(measureRed, measureIR)
         spO2Array = 110-25 * RR
-
         Spo2Value =int( np.round(np.mean(spO2Array),0))
 
         return Spo2Value
@@ -57,3 +61,12 @@ class Processing:
         measureN = measure/abs
         measureN = np.round(measureN,4)
         return measureN
+    
+    def delbaselinedrift(self, measure, sampleF):
+       #200 ms window
+       n  = (200* sampleF)/1000
+       k = 1
+       for x in range(len(measure)):
+           zeroline = sp.zeros(1,n)
+           lim1 = x - n/2
+           lim2 = x -(n/2) -1

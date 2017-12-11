@@ -81,36 +81,36 @@ class Sensor:
         self.IR = self.Spo2.buffer_ir
         self.Red = self.Spo2.buffer_red
 
-        #Normalize Red and IR signals}
-        self.Red = pro.Normalize(self.Red)
-        self.IR = pro.Normalize(self.IR)
+        # #Normalize Red and IR signals}
+        # self.Red = pro.Normalize(self.Red)
+        # self.IR = pro.Normalize(self.IR)
 
-        #get DC component of the signals
-        DCIR = pro.getDCComponent(self.IR)
-        DCRed = pro.getDCComponent(self.Red)
+        # #get DC component of the signals
+        # DCIR = pro.getDCComponent(self.IR)
+        # DCRed = pro.getDCComponent(self.Red)
 
-        #extract AC component
-        self.Red = pro.getACcomponent(self.Red)
-        self.IR = pro.getACcomponent(self.IR)
+        # #extract AC component
+        # self.Red = pro.getACcomponent(self.Red)
+        # self.IR = pro.getACcomponent(self.IR)
        
-        #Baseline Drift elimination
-        self.Red = pro.delbaselinedrift(self.Red, SampleFReading)
-        self.IR = pro.delbaselinedrift(self.IR, SampleFReading)
+        # #Baseline Drift elimination
+        # # self.Red = pro.delbaselinedrift(self.Red, SampleFReading)
+        # # self.IR = pro.delbaselinedrift(self.IR, SampleFReading)
+        
+        # #Median filter to the signals
+        # self.IR = sp.medfilt(self.IR,199)
+        # self.Red = sp.medfilt(self.Red,199)
 
-        #Median filter to the signals
-        self.IR = sp.medfilt(self.IR,200)
-        self.Red = sp.medfilt(self.Red,200)
+        # #notch filter at 60hz
+        # self.IR = pro.NotchFilter(self.IR, 60,SampleFReading)
+        # self.Red = pro.NotchFilter(self.Red, 60,SampleFReading)
 
-        #notch filter at 60hz
-        self.IR = pro.NotchFilter(self.IR, 60,SampleFReading)
-        self.Red = pro.NotchFilter(self.Red, 60,SampleFReading)
-
-        self.IR = pro.lowPasFIRFilter(self.IR, 5,SampleFReading)
-        self.Red = pro.lowPasFIRFilter(self.Red, 5,SampleFReading)
+        # self.IR = pro.lowPasFIRFilter(self.IR, 5,SampleFReading)
+        # self.Red = pro.lowPasFIRFilter(self.Red, 5,SampleFReading)
     
-        # #highpass filter at .5Hz:
-        self.IR = pro.highPassFIRFilter(self.IR,.5,SampleFReading)
-        self.Red = pro.highPassFIRFilter(self.Red,.5,SampleFReading)
+        # # #highpass filter at .5Hz:
+        # self.IR = pro.highPassFIRFilter(self.IR,.8,SampleFReading)
+        # self.Red = pro.highPassFIRFilter(self.Red,.8,SampleFReading)
 
         #Compute Spo2Value:
         self.Spo2Value = pro.calcSpO2(self.Red,self.IR,DCIR,DCRed)

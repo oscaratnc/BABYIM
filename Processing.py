@@ -40,17 +40,8 @@ class Processing:
         DCcomponent = np.mean(measure)
         return DCcomponent
     
-    def ratioOfRatios(self, measureRed,measureIR):
-        dcRed= self.getDCComponent(measureRed)
-        acRed = self.getACcomponent(measureRed)
-        dcIR = self.getDCComponent(measureIR)
-        acIR = self.getACcomponent(measureIR)
-
+    def calcSpO2(self, acRed,acIR,DCIR,DCRed):
         RR = (acRed/dcRed) / (acIR/dcIR)
-        return RR
-
-    def calcSpO2(self, measureRed, measureIR):
-        RR = self.ratioOfRatios(measureRed, measureIR)
         spO2Array = 110-25 * RR
         Spo2Value =int( np.round(np.mean(spO2Array),0))
 
@@ -63,10 +54,36 @@ class Processing:
         return measureN
     
     def delbaselinedrift(self, measure, sampleF):
-       #200 ms window
-       n  = (200* sampleF)/1000
-       k = 1
-       for x in range(len(measure)):
-           zeroline = sp.zeros(1,n)
-           lim1 = x - n/2
-           lim2 = x -(n/2) -1
+       
+        while i<2:
+            if i == 0:
+                #200 ms window for the first time
+                 n  = (200* sampleF)/1000
+            elif i==1:
+                #600 ms window fot the second time
+                 n = (600 *sampleF)/1000
+            line1 = np.array([])
+            for k in range(len(measure)):
+                    line0 = np.array([]) 
+                    lim1 = k - n/2
+                    lim2 = k + (n/2) -1
+                    if lim2 > len(measure):
+                        lim2 = len(measure)
+                    if lim1 <= 0:
+                        for k2 in range((n/2)+lim1,lim2):
+                            np.append(line0,measure[k])
+                            
+                    else: 
+                        k1 = 0
+                        for k2 in range (lim1,lim2):
+                            np.append(line0,measure[k2])
+
+                    line0 = np.sort(line0)
+                    if lim1 <= 0:
+                        mean = (line0[n+lim1-1]+line0[n+lim1])/2
+                    else:
+                        mean = (line0[n/2]+line0[n/2 + 1])/2
+                    np.append(line1,mean)
+                    measure =measure- line1
+            i += 1
+       return measure

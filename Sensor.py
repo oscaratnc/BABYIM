@@ -84,34 +84,41 @@ class Sensor:
         #Normalize Red and IR signals}
         self.Red = pro.Normalize(self.Red)
         self.IR = pro.Normalize(self.IR)
-       
-        #Median filter to the signals
-        self.IR = sp.medfilt(self.IR,5)
-        self.Red = sp.medfilt(self.Red,5)
 
-        #low pass filter at 60hz
+        #get DC component of the signals
+        DCIR = pro.getDCComponent(self.IR)
+        DCRed = pro.getDCComponent(self.Red)
+
+        #extract AC component
+        self.Red = pro.getACcomponent(self.Red)
+        self.IR = pro.getACcomponent(self.IR)
+       
+        #Baseline Drift elimination
+        self.Red = pro.delbaselinedrift(self.Red, SampleFReading)
+        self.IR = pro.delbaselinedrift(self.IR, SampleFReading)
+
+        #Median filter to the signals
+        self.IR = sp.medfilt(self.IR,200)
+        self.Red = sp.medfilt(self.Red,200)
+
+        #notch filter at 60hz
         self.IR = pro.NotchFilter(self.IR, 60,SampleFReading)
         self.Red = pro.NotchFilter(self.Red, 60,SampleFReading)
 
-
         #lowpass filter at 6Hz:
-        self.IR = pro.lowPasFIRFilter(self.IR, 6,SampleFReading)
-        self.Red = pro.lowPasFIRFilter(self.Red, 6
-        ,SampleFReading)
+        self.IR = pro.lowPasFIRFilter(self.IR, 5,SampleFReading)
+        self.Red = pro.lowPasFIRFilter(self.Red, 5,SampleFReading)
     
-        #highpass filter at .5Hz:
+        # #highpass filter at .5Hz:
         self.IR = pro.highPassFIRFilter(self.IR,.5,SampleFReading)
         self.Red = pro.highPassFIRFilter(self.Red,.5,SampleFReading)
 
         #Compute Spo2Value:
-        self.Spo2Value = pro.calcSpO2(self.Red,self.IR)
+        self.Spo2Value = pro.calcSpO2(self.Red,self.IR,DCIR,DCRed)
         print "Spo2: ", self.Spo2Value, "%"
 
         self.generateDataFile()
         
-        #get AC componente to plot the signal:
-        self.Red = pro.getACcomponent(self.Red)
-        self.IR = pro.getACcomponent(self.IR)
        
     
     def generateDataFile(self):

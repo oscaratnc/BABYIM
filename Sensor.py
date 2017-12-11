@@ -105,7 +105,6 @@ class Sensor:
         self.IR = pro.NotchFilter(self.IR, 60,SampleFReading)
         self.Red = pro.NotchFilter(self.Red, 60,SampleFReading)
 
-        #lowpass filter at 6Hz:
         self.IR = pro.lowPasFIRFilter(self.IR, 5,SampleFReading)
         self.Red = pro.lowPasFIRFilter(self.Red, 5,SampleFReading)
     

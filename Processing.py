@@ -54,7 +54,7 @@ class Processing:
         return measureN
     
     def delbaselinedrift(self, measure, sampleF):
-       
+        i=0
         while i<2:
             if i == 0:
                 #200 ms window for the first time
@@ -71,19 +71,26 @@ class Processing:
                         lim2 = len(measure)
                     if lim1 <= 0:
                         for k2 in range((n/2)+lim1,lim2):
-                            np.append(line0,measure[k])
-                            
+                            if i == 0 :
+                                np.append(line0,measure[k])
+                            else:
+                                np.append(line0,line1[k])
                     else: 
                         k1 = 0
                         for k2 in range (lim1,lim2):
-                            np.append(line0,measure[k2])
-
+                            if i == 0:
+                                np.append(line0,measure[k2])
+                            else: 
+                                np.append(line0,line1[k2])
                     line0 = np.sort(line0)
                     if lim1 <= 0:
                         mean = (line0[n+lim1-1]+line0[n+lim1])/2
                     else:
                         mean = (line0[n/2]+line0[n/2 + 1])/2
+
                     np.append(line1,mean)
-                    measure =measure- line1
+
+                    if i==1:
+                        measure =measure- line1
             i += 1
-       return measure
+        return measure

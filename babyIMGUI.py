@@ -4,7 +4,7 @@ import numpy as np
 import pyqtgraph as pg
 
 numSecondsECG=2
-numSecondsSpO2=15
+numSecondsSpO2=20
 sampleRateSpo2 = 200
 
 
@@ -29,7 +29,7 @@ IR = Sensors.IR
 app = QtGui.QApplication([])
 
 win = pg.GraphicsWindow()
-win.resize(800,600)
+win.resize(900,1000)
 win.setWindowTitle("Signals Ploting")
 
 pg.setConfigOptions(antialias= True)

@@ -41,13 +41,13 @@ class Sensor:
     def getECG(self, numSeconds):
         print "Begin ECG measure"
         sampleRate = 250
-        samplePeriod = 1/250
+        samplePeriod = (1/250)*1000
         starTime = wiringpi.millis()
 
         while wiringpi.millis()-starTime < numSeconds*1000: 
             Ecg = round((self.mcp.read_adc(1)*3.3)/1024,3)
             self.ecgValues = np.append(self.ecgValues,Ecg)
-            wiringpi.delayMicroseconds(samplePeriod)
+            wiringpi.delay(samplePeriod)
     
     
 
@@ -65,14 +65,17 @@ class Sensor:
             if self.Spo2.newSample == True:
                 self.Spo2.readSample()
                 self.Spo2.newSample = False
+               
             print (wiringpi.millis()-startTime)/1000
+            # self.Spo2.readSample()
+            # wiringpi.delay(1)
         print "Spo2 measure ready"
                 
         print "processing signal...."
         print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 
-        print "SF Reading IR: ", len(self.Spo2.buffer_ir)/numSeconds
-        print "SF Reading Red: ", len(self.Spo2.buffer_red)/numSeconds
+        print "SF Reading IR: ", len(self.Spo2.buffer_ir)
+        print "SF Reading Red: ", len(self.Spo2.buffer_red)
         
         SampleFReading =  len(self.Spo2.buffer_ir)/numSeconds
         pro = pr.Processing()
@@ -80,41 +83,45 @@ class Sensor:
         #get Red and Ir buffers
         self.IR = self.Spo2.buffer_ir
         self.Red = self.Spo2.buffer_red
+        
 
         # #Normalize Red and IR signals}
-        # self.Red = pro.Normalize(self.Red)
-        # self.IR = pro.Normalize(self.IR)
+        self.Red = pro.Normalize(self.Red)
+        self.IR = pro.Normalize(self.IR)
+        
 
-        # #get DC component of the signals
+        # # #get DC component of the signals
         # DCIR = pro.getDCComponent(self.IR)
         # DCRed = pro.getDCComponent(self.Red)
 
-        # #extract AC component
+        # # #extract AC component
         # self.Red = pro.getACcomponent(self.Red)
         # self.IR = pro.getACcomponent(self.IR)
        
         # #Baseline Drift elimination
-        # # self.Red = pro.delbaselinedrift(self.Red, SampleFReading)
-        # # self.IR = pro.delbaselinedrift(self.IR, SampleFReading)
+        # self.Red = sp.detrend(self.Red)
+        # self.IR = sp.detrend(self.IR)
         
-        # #Median filter to the signals
-        # self.IR = sp.medfilt(self.IR,199)
-        # self.Red = sp.medfilt(self.Red,199)
+        # # #Median filter to the signals
+        # self.IR = sp.medfilt(self.IR,9)
+        # self.Red = sp.medfilt(self.Red,9)
 
-        # #notch filter at 60hz
+        # # #notch filter at 60hz
         # self.IR = pro.NotchFilter(self.IR, 60,SampleFReading)
         # self.Red = pro.NotchFilter(self.Red, 60,SampleFReading)
 
-        # self.IR = pro.lowPasFIRFilter(self.IR, 5,SampleFReading)
-        # self.Red = pro.lowPasFIRFilter(self.Red, 5,SampleFReading)
-    
-        # # #highpass filter at .5Hz:
-        # self.IR = pro.highPassFIRFilter(self.IR,.8,SampleFReading)
-        # self.Red = pro.highPassFIRFilter(self.Red,.8,SampleFReading)
+        # self.IR = pro.lowPasFIRFilter(self.IR, 6,SampleFReading)
+        # self.Red = pro.lowPasFIRFilter(self.Red, 6,SampleFReading)
 
-        #Compute Spo2Value:
-        self.Spo2Value = pro.calcSpO2(self.Red,self.IR,DCIR,DCRed)
-        print "Spo2: ", self.Spo2Value, "%"
+        # self.Red = pro.highPassFIRFilter(self.Red, 1,SampleFReading)
+        # self.IR =pro.highPassFIRFilter(self.IR,1,SampleFReading)
+
+        # print self.Red
+        # print self.IR
+    
+        # #Compute Spo2Value:
+        # self.Spo2Value = pro.calcSpO2(self.Red,self.IR,DCIR,DCRed)
+        # print "Spo2: ", self.Spo2Value, "%"
 
         self.generateDataFile()
         

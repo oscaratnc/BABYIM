@@ -1,6 +1,6 @@
 {
     "remotePath": "/home/pi/BABYIM",
-    "host": "192.168.3.77",
+    "host": "192.168.3.196",
     "username": "pi",
     "password": "raspberry",
     "port": 22,

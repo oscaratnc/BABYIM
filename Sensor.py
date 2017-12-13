@@ -86,8 +86,8 @@ class Sensor:
         
 
         # #Normalize Red and IR signals}
-        self.Red = pro.Normalize(self.Red)
-        self.IR = pro.Normalize(self.IR)
+        # self.Red = pro.Normalize(self.Red)
+        # self.IR = pro.Normalize(self.IR)
         
 
         # # #get DC component of the signals

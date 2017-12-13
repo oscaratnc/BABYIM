@@ -4,8 +4,8 @@ import numpy as np
 import pyqtgraph as pg
 
 numSecondsECG=2
-numSecondsSpO2=20
-sampleRateSpo2 = 200
+numSecondsSpO2=5
+sampleRateSpo2 = 400
 
 
 Sensors = Sensor(sampleRateSpo2)

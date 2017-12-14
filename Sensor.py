@@ -4,7 +4,7 @@ from smbus2 import SMBus
 import RPi.GPIO as GPIO
 import Adafruit_MCP3008
 import wiringpi
-import Processing as pro
+import Processing as pr
 import numpy as np
 from scipy import signal as sp
 from gpiozero import Button
@@ -73,27 +73,29 @@ class Sensor:
         pro = pr.Processing()
 
         #get Red and Ir buffers
-        self.IR = self.Spo2.buffer_ir
-        self.Red = self.Spo2.buffer_red
+        self.IR = -1*self.Spo2.buffer_ir
+        self.Red = -1* self.Spo2.buffer_red
         
-
         # #Normalize Red and IR signals}
         self.Red = pro.Normalize(self.Red)
-        self.IR = pro.Normalize(self.IR)
+        self.IR =  pro.Normalize(self.IR)
  
         #Mean filter widnow = 4
-        self.IR  = pro.movMean(self.IR,4)
-        self.Red = pro.movMean(self.Red,4)
+        # self.IR  = pro.movMean(self.IR,4)
+        # self.Red = pro.movMean(self.Red,4)
+        self.Red = sp.medfilt(self.Red,7)
+        self.IR = sp.medfilt(self.IR,7)
 
         #Butterword 4th order bandpass filter .5-6Hz
-        self.IR = pro.BPButterFilter(self.IR,0.5,6.0,self.samplerateSpo2)
-        self.Red = pro.BPButterFilter(self.Red,0.5,6.0,self.samplerateSpo2)
+        self.IR =  pro.BPButterFilter(self.IR,0.5,4.0,self.samplerateSpo2)
+        self.Red = pro.BPButterFilter(self.Red,0.5,4.0,self.samplerateSpo2)
         self.generateDataFile()
 
     def Spo2Valuecalc(self):
         # #Compute Spo2Value:
-        self.Spo2Value = p
-        print "Spo2: ", self.Spo2Value, "%"
+        pro = pr.Processing()
+        Spo2Value = pro.calcSpO2(self.Red,self.IR)
+        print "Spo2: ", Spo2Value, "%"
         return Spo2Value
         
     def generateDataFile(self):

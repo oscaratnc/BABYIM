@@ -4,7 +4,7 @@ import numpy as np
 import pyqtgraph as pg
 
 numSecondsECG=2
-numSecondsSpO2=2
+numSecondsSpO2=3
 sampleRateSpo2 = 400
 Spo2Value = 0
 
@@ -28,21 +28,16 @@ IR = Sensors.IR
 app = QtGui.QApplication([])
 
 win = pg.GraphicsWindow()
-win.resize(900,1000)
+win.resize(600,800)
 win.setWindowTitle("Signals Ploting")
 
 pg.setConfigOptions(antialias= True)
-p1 = win.addPlot(title="ECG")
-p1.plot(ECG, pen = pg.mkPen(color = 'r', width= 2))
+# p1 = win.addPlot(title="ECG")
+# p1.plot(ECG, pen = pg.mkPen(color = 'r', width= 2))
 
 win.nextRow()
 p2 = win.addPlot(title = "RED LED")
 p2.plot(RED, pen = pg.mkPen(color = 'g', width= 2))
-
-
-win.nextRow()
-p3= win.addPlot(title = "IR LED")
-p3.plot(IR, pen = pg.mkPen(color = 'b', width= 2))
 
 if __name__ == '__main__':
     import sys

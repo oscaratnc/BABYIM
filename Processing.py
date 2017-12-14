@@ -1,5 +1,4 @@
 from scipy import signal as sp
-from scipy import ndimage as nd
 import numpy as np
 
 class Processing:
@@ -19,7 +18,7 @@ class Processing:
 
     def getACcomponent(self, measure):
         mean = np.mean(measure)
-        measure = -1*(measure-mean)
+        measure = (measure-mean)
         return measure
     
     def getDCComponent(self,measure):
@@ -32,8 +31,9 @@ class Processing:
         DCIR = self. getDCComponent(signalIR)
         acIR = self.getACcomponent(signalIR)
         
-        RR = (acRed/DCRed)/(acIR/DCIR)
-        spO2Value =  96.545+ 0.616*mp.mean(RR)
+        RR =round(np.mean((acRed/DCRed)/(acIR/DCIR)),4)
+        print "RR: ", RR
+        spO2Value =  96.545 + 0.616 * RR
         Spo2Value =int(np.round(spO2Value,0))
         return Spo2Value
         

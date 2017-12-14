@@ -4,7 +4,7 @@ from smbus2 import SMBus
 import RPi.GPIO as GPIO
 import Adafruit_MCP3008
 import wiringpi
-import Processing as pr
+import Processing as pro
 import numpy as np
 from scipy import signal as sp
 from gpiozero import Button
@@ -92,7 +92,7 @@ class Sensor:
 
     def Spo2Valuecalc(self):
         # #Compute Spo2Value:
-        self.Spo2Value = pro.calcSpO2(Red,IR)
+        self.Spo2Value = p
         print "Spo2: ", self.Spo2Value, "%"
         return Spo2Value
         

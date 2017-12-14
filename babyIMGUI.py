@@ -4,27 +4,26 @@ import numpy as np
 import pyqtgraph as pg
 
 numSecondsECG=2
-numSecondsSpO2=5
+numSecondsSpO2=2
 sampleRateSpo2 = 400
+Spo2Value = 0
 
+Sensors = Sensor()
+Sensors.configSensors(sampleRateSpo2)
 
-Sensors = Sensor(sampleRateSpo2)
-print "ECG reading"
+print "Reading ECG Signal...."
 Sensors.getECG(numSecondsECG)
 print "ECG done"
-Sensors.getSpo2(numSecondsSpO2)
+print "Reading SPo2Value......"
+Sensors.getSpo2read(numSecondsSpO2)
+Spo2Value = Sensors.Spo2Valuecalc()
 print "SPO2 done"
-
-#Sensors.generateDataFile()
 
 
 ECG = Sensors.ecgValues
 RED  = Sensors.Red
 IR = Sensors.IR
-#PPG = RED/IR
-#print ECG
-#print RED
-#print IR
+
 
 app = QtGui.QApplication([])
 

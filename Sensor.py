@@ -7,6 +7,7 @@ import wiringpi
 import Processing as pr
 import numpy as np
 from scipy import signal as sp
+from scipy import fftpack as spfft
 from gpiozero import Button
 GPIO.setmode(GPIO.BCM)
 
@@ -17,7 +18,15 @@ class Sensor:
         self.ecgValues = np.array([])
         self.Red = np.array([])
         self.IR = np.array([])
+        self.RedRaw = np.array([])
+        self.IRRaw = np.array([])
         self.Spo2Value = 0
+        self.HR = np.array([])
+       
+        self.IR_Filtered_FFT= np.array([])
+
+        self.Red_Filtered_FFT= np.array([])
+
        
         
     def configSensors(self,samplerateSpo2):
@@ -33,71 +42,72 @@ class Sensor:
         #Definitions fot Spo2 acquisition
         self.samplerateSpo2 = samplerateSpo2
         self.Spo2 = Sp2.Spo2Sensor(sampleAvg= 4,sampleRate=self.samplerateSpo2)
+        AFthreshold= 20
+        self.Spo2.enableAfull()
+        self.Spo2.setFIFOAF(AFthreshold)
         print "SpO2 config ready"
 
-    def getECG(self, numSeconds):
+    def getECG(self, numSeconds,sampleRate):
         print "Begin ECG measure"
-        sampleRate = 250
-        samplePeriod = (1/250)*1000
+        samplerate = sampleRate 
+        samplePeriod = (1/samplerate)*1000
         starTime = wiringpi.millis()
 
         while wiringpi.millis()-starTime < numSeconds*1000: 
             Ecg = round((self.mcp.read_adc(1)*3.3)/1024,3)
             self.ecgValues = np.append(self.ecgValues,Ecg)
-            wiringpi.delay(samplePeriod)
+            wiringpi.delay(int(samplePeriod))
             
     def getSpo2read(self,numSeconds):
         print "begin SPO2 measure"
         startTime = wiringpi.millis()
         newSample = False
-        AFthreshold= 20
-        self.Spo2.enableAfull()
-        self.Spo2.setFIFOAF(AFthreshold)
         interrupt  = Button(7)
-
+        
         while wiringpi.millis()-startTime < numSeconds*1000:
             interrupt.when_activated = self.Spo2.sampleAvailable()
             if self.Spo2.newSample == True:
                 self.Spo2.readSample()
                 self.Spo2.newSample = False    
-            print (wiringpi.millis()-startTime)/1000
+            #print (wiringpi.millis()-startTime)/1000
           
         print "Spo2 measure ready"
                 
-        print "processing signal...."
-        print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-
-        print "SF Reading IR: ", len(self.Spo2.buffer_ir)
-        print "SF Reading Red: ", len(self.Spo2.buffer_red)
-        
         pro = pr.Processing()
 
         #get Red and Ir buffers
-        self.IR = -1*self.Spo2.buffer_ir
-        self.Red = -1* self.Spo2.buffer_red
-        
-        # #Normalize Red and IR signals}
+        self.IR =  self.Spo2.buffer_ir 
+        self.Red = self.Spo2.buffer_red
+
+         # #Normalize Red and IR signals
         self.Red = pro.Normalize(self.Red)
         self.IR =  pro.Normalize(self.IR)
+
+         #Butterword 4th order bandpass filter .5-6Hz
+        self.IR = pro.BPButterFilter(self.IR, 0.5, 4.0,self.samplerateSpo2,4)
+        self.Red = pro.BPButterFilter(self.Red, 0.5, 4.0,self.samplerateSpo2,4)
+
+         #fft filtered dignal
+        self.IR_Filtered_FFT = spfft.fft(self.IR)
+        self.Red_Filtered_FFT= spfft.fft(self.Red)
+
+    
  
-        #Mean filter widnow = 4
+            #Mean filter widnow = 4
         # self.IR  = pro.movMean(self.IR,4)
         # self.Red = pro.movMean(self.Red,4)
-        self.Red = sp.medfilt(self.Red,7)
-        self.IR = sp.medfilt(self.IR,7)
+        self.Red = sp.medfilt(self.Red,3) *- 1
+        self.IR = sp.medfilt(self.IR,3) * -1
 
-        #Butterword 4th order bandpass filter .5-6Hz
-        self.IR =  pro.BPButterFilter(self.IR,0.5,4.0,self.samplerateSpo2)
-        self.Red = pro.BPButterFilter(self.Red,0.5,4.0,self.samplerateSpo2)
-        self.generateDataFile()
+        self.Spo2Value = pro.calcSpO2(self.Red,self.IR)
+        print "Spo2: ", self.Spo2Value, "%"
 
-    def Spo2Valuecalc(self):
-        # #Compute Spo2Value:
-        pro = pr.Processing()
-        Spo2Value = pro.calcSpO2(self.Red,self.IR)
-        print "Spo2: ", Spo2Value, "%"
-        return Spo2Value
-        
+        self.HR  = pro.heartRateCalc(self.IR)
+    
+
+    
+       
+    
     def generateDataFile(self):
         
         file = open("DataFile_Read.csv", "w")

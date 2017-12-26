@@ -4,40 +4,62 @@ import numpy as np
 import pyqtgraph as pg
 
 numSecondsECG=2
-numSecondsSpO2=3
-sampleRateSpo2 = 400
-Spo2Value = 0
+numSecondsSpO2=5
+sampleRate = 400.0
+T= 1/sampleRate
+
 
 Sensors = Sensor()
-Sensors.configSensors(sampleRateSpo2)
+Sensors.configSensors(sampleRate)
 
 print "Reading ECG Signal...."
-Sensors.getECG(numSecondsECG)
+Sensors.getECG(numSecondsECG,sampleRate)
 print "ECG done"
 print "Reading SPo2Value......"
 Sensors.getSpo2read(numSecondsSpO2)
-Spo2Value = Sensors.Spo2Valuecalc()
-print "SPO2 done"
 
 
+Spo2Value = Sensors.Spo2Value
 ECG = Sensors.ecgValues
 RED  = Sensors.Red
 IR = Sensors.IR
+HR = Sensors.HR
+print HR
 
+fftFILTIR = Sensors.IR_Filtered_FFT
+fftFiltRed = Sensors.Red_Filtered_FFT
 
 app = QtGui.QApplication([])
 
-win = pg.GraphicsWindow()
-win.resize(600,800)
-win.setWindowTitle("Signals Ploting")
-
+win = pg.GraphicsWindow() 
+win.resize(600,500)
+win.setWindowTitle("SpO2 Original")
 pg.setConfigOptions(antialias= True)
-# p1 = win.addPlot(title="ECG")
-# p1.plot(ECG, pen = pg.mkPen(color = 'r', width= 2))
+
+
+p1 = win.addPlot(title="Spo2  IR  Original")
+p1.plot(IR, pen = pg.mkPen(color = 'r', width= 2))
 
 win.nextRow()
-p2 = win.addPlot(title = "RED LED")
-p2.plot(RED, pen = pg.mkPen(color = 'g', width= 2))
+p2 = win.addPlot(title = "SpO2 Red Original")
+p2.plot(HR,pen = pg.mkPen(color = 'w', width= 2))
+
+
+win.nextRow()
+
+N = len(fftFILTIR)
+xfIR = np.linspace(0.0,30.0)
+p3 = win.addPlot(title = "fft IR Filtered")
+yfft =  np.abs(fftFILTIR[0:50])
+p3.plot(xfIR, yfft,pen = pg.mkPen(color = 'g', width= 2))
+
+win.nextRow()
+p4 = win.addPlot(title="FFT RED Filtered")
+N = len(fftFiltRed)
+xfRed = np.linspace(0.0,30.0)
+yfft= np.abs(fftFiltRed[0:50])
+p4.plot(xfRed,yfft, pen = pg.mkPen(color = 'b', width= 2))
+
 
 if __name__ == '__main__':
     import sys

@@ -254,12 +254,12 @@ class Spo2Sensor (object):
     def setLEDMode(self, mode):
         mode = _get_valid(self.MODE, mode)
         self.bitmask(self.MODECONFIG, self.MODE_MASK, mode)
-        print "mode set: ", mode
+        #print "mode set: ", mode
     
     def setADCRange(self, ADCrange):
         ADCrange = _get_valid(self.ADCRANGE, ADCrange)
         self.bitmask(self.SPO2CONFIG, self.ADCRANGE_MASK,ADCrange)
-        print "ADC at ", ADCrange
+        #print "ADC at ", ADCrange
 
     def setSampleRate(self, sampleRate):
         sampleRate = _get_valid(self.SAMPLE_RATE, sampleRate)
